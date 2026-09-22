@@ -1,9 +1,7 @@
-<!-- BEGIN:nextjs-agent-rules -->
+## Project continuity
 
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+- Read `PROJECT_STATUS.md` before beginning project work.
+- Treat actual code as authoritative if it conflicts with the status file.
+- Update `PROJECT_STATUS.md` after meaningful implementation changes.
+- Keep the status concise; replace outdated state rather than appending indefinitely.
+- Do not store secrets or full source-code listings in project-memory files.
