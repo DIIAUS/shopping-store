@@ -10,7 +10,20 @@ export type ProductCardData = {
   accentColor: string;
 };
 
-export type ProductLayerDepth = 1 | 2 | 3;
+type HeroLayerDepth = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+
+type HeroProduct = {
+  id: string;
+  name: string;
+  imageUrl: string;
+  depth: HeroLayerDepth;
+  x: string;
+  y: string;
+  width: string;
+  rotation?: number;
+};
+
+export type ProductLayerDepth = 1 | 2 | 3 | 4 | 5;
 
 export type ProductLayerData = {
   product: ProductCardData;
@@ -21,13 +34,30 @@ export type ProductLayerData = {
   depth: ProductLayerDepth;
 };
 
+export type CollectionCardBackground =
+  | {
+      type: 'color';
+      color: string;
+    }
+  | {
+      type: 'image';
+      imageUrl: string;
+      overlayColor?: string;
+      position?: string;
+    };
 
+export type CollectionCardCta = {
+  label: string;
+  backgroundColor: string;
+  textColor?: string;
+};
 
 export type ProductCollectionCardData = {
   id: string;
   slug: string;
   title: string;
   tagline?: string;
-  accentColor: string;
+  background: CollectionCardBackground;
+  cta: CollectionCardCta;
   products: ProductLayerData[];
 };

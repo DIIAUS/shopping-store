@@ -13,12 +13,16 @@ import {
   useTransform,
 } from "framer-motion";
 
-import type { ProductCardData } from "@/types/product";
+import type {
+  CollectionCardBackground,
+  ProductCardData,
+} from "@/types/product";
 
 type ShowcaseProductCardProps = {
   product: ProductCardData;
   priority?: boolean;
   imageScale?: number;
+  background?: CollectionCardBackground;
 };
 
 const Perspective = styled.article`
@@ -69,11 +73,30 @@ const AccentCircle = styled.div<{ $color: string }>`
   background: ${({ $color }) => $color};
 `;
 
+const BackgroundMedia = styled.div<{ $position: string }>`
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  img {
+    object-fit: cover;
+    object-position: ${({ $position }) => $position};
+  }
+`;
+
+const BackgroundOverlay = styled.div<{ $color: string }>`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: ${({ $color }) => $color};
+`;
+
 const BrandText = styled.p`
   position: absolute;
   top: 40%;
   left: 6%;
-  z-index: 1;
+  z-index: 2;
   max-width: 90%;
   margin: 0;
   overflow: hidden;
@@ -101,7 +124,7 @@ const ProductImageAnchor = styled.div`
   position: absolute;
   top: 50%;
   left: 50%;
-  z-index: 2;
+  z-index: 3;
   width: clamp(220px, 90%, 300px);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
@@ -124,9 +147,7 @@ const ProductImage = styled(motion.div)`
 const Details = styled.div`
   display: grid;
   gap: 18px;
-  padding:
-    20px clamp(18px, 6vw, 22px)
-    clamp(18px, 6vw, 22px);
+  padding: 20px clamp(18px, 6vw, 22px) clamp(18px, 6vw, 22px);
 `;
 
 const ProductHeader = styled.div`
@@ -192,7 +213,12 @@ function formatPrice(price: number, currency: ProductCardData["currency"]) {
   }).format(price);
 }
 
-export function ShowcaseProductCard({ product, priority = false, imageScale = 1, }: ShowcaseProductCardProps) {
+export function ShowcaseProductCard({
+  product,
+  priority = false,
+  imageScale = 1,
+  background,
+}: ShowcaseProductCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   const pointerX = useMotionValue(0);
@@ -216,10 +242,7 @@ export function ShowcaseProductCard({ product, priority = false, imageScale = 1,
 
   const imageY = useTransform(smoothY, [-0.5, 0.5], [-8, 8]);
 
-  const safeImageScale = Math.min(
-    Math.max(imageScale, 0.6),
-    1.5,
-  );
+  const safeImageScale = Math.min(Math.max(imageScale, 0.6), 1.5);
 
   function handlePointerMove(event: PointerEvent<HTMLElement>) {
     if (prefersReducedMotion || event.pointerType !== "mouse") {
@@ -270,36 +293,60 @@ export function ShowcaseProductCard({ product, priority = false, imageScale = 1,
         onPointerLeave={resetTilt}
       >
         <Visual>
-          <AccentCircle $color={product.accentColor} />
+          {background?.type === "image" ? (
+            <>
+              <BackgroundMedia $position={background.position ?? "center"}>
+                <Image
+                  src={background.imageUrl}
+                  alt=""
+                  fill
+                  sizes="(max-width: 480px) 100vw, 320px"
+                  loading={priority ? "eager" : "lazy"}
+                />
+              </BackgroundMedia>
+
+              <BackgroundOverlay
+                $color={background.overlayColor ?? "rgb(0 0 0 / 30%)"}
+              />
+            </>
+          ) : (
+            <AccentCircle
+              $color={
+                background?.type === "color"
+                  ? background.color
+                  : product.accentColor
+              }
+            />
+          )}
 
           <BrandText aria-hidden="true">{product.brand}</BrandText>
           <ProductImageAnchor>
-<ProductImage
-  style={{
-    x: imageX,
-    y: imageY,
-    scale: safeImageScale,
-  }}
-  whileHover={
-    prefersReducedMotion
-      ? undefined
-      : {
-          scale: safeImageScale * 1.06,
-          rotate: -4,
-        }
-  }
-  transition={{
-    type: 'spring',
-    stiffness: 220,
-    damping: 18,
-  }}
->
+            <ProductImage
+              style={{
+                x: imageX,
+                y: imageY,
+                scale: safeImageScale,
+              }}
+              whileHover={
+                prefersReducedMotion
+                  ? undefined
+                  : {
+                      scale: safeImageScale * 1.06,
+                      rotate: -4,
+                    }
+              }
+              transition={{
+                type: "spring",
+                stiffness: 220,
+                damping: 18,
+              }}
+            >
               <Image
                 src={product.imageUrl}
                 alt={product.name}
                 fill
                 sizes="(max-width: 480px) 85vw, 300px"
-                priority={priority}
+                loading={priority ? "eager" : "lazy"}
               />
             </ProductImage>
           </ProductImageAnchor>

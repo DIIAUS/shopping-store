@@ -1,22 +1,24 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import type { PointerEvent } from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import type { PointerEvent } from "react";
 import {
   motion,
   useMotionValue,
   useReducedMotion,
   useSpring,
   useTransform,
-} from 'framer-motion';
-import styled from 'styled-components';
+} from "framer-motion";
+import styled from "styled-components";
 
-import type { ProductCollectionCardData } from '@/types/product';
+import type { ProductCollectionCardData } from "@/types/product";
 
-import { ProductLayer } from './ProductLayer';
+import { ProductLayer } from "./ProductLayer";
 
 type ProductCollectionCardProps = {
   card: ProductCollectionCardData;
+  priority?: boolean;
 };
 
 const Perspective = styled.article`
@@ -60,7 +62,7 @@ const BackgroundText = styled.p`
   position: absolute;
   top: 32%;
   left: 6%;
-  z-index: 0;
+  z-index: 2;
   max-width: 90%;
   margin: 0;
   overflow: hidden;
@@ -78,9 +80,7 @@ const Details = styled.div`
   z-index: 10;
   display: grid;
   gap: 16px;
-  padding:
-    0 clamp(18px, 6vw, 24px)
-    clamp(18px, 6vw, 24px);
+  padding: 0 clamp(18px, 6vw, 24px) clamp(18px, 6vw, 24px);
 `;
 
 const Title = styled.h2`
@@ -95,6 +95,11 @@ const Footer = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+
+  @media (max-width: 320px) {
+    align-items: stretch;
+    flex-direction: column;
+  }
 `;
 
 const Tagline = styled.p`
@@ -104,18 +109,59 @@ const Tagline = styled.p`
   text-transform: uppercase;
 `;
 
-const ViewButton = styled(Link)<{ $color: string }>`
+const ViewButton = styled(Link)<{
+  $backgroundColor: string;
+  $textColor: string;
+}>`
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
   padding: 12px 16px;
+  border: 2px solid ${({ $backgroundColor }) => $backgroundColor};
   border-radius: 10px;
-  color: #111111;
-  background: ${({ $color }) => $color};
+
+  color: ${({ $textColor }) => $textColor};
+  background: ${({ $backgroundColor }) => $backgroundColor};
+
   font-size: 13px;
   font-weight: 800;
   text-transform: uppercase;
+  transition:
+    color 180ms ease,
+    background 180ms ease;
+
+  &:hover {
+    color: #ffffff;
+    background: transparent;
+  }
+`;
+
+const BackgroundMedia = styled.div<{
+  $position: string;
+}>`
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  img {
+    object-fit: cover;
+    object-position: ${({ $position }) => $position};
+  }
+`;
+
+const BackgroundOverlay = styled.div<{
+  $color: string;
+}>`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: ${({ $color }) => $color};
 `;
 
 export function ProductCollectionCard({
   card,
+  priority = false,
 }: ProductCollectionCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -132,37 +178,20 @@ export function ProductCollectionCard({
     damping: 22,
   });
 
-  const rotateX = useTransform(
-    pointerY,
-    [-0.5, 0.5],
-    [7, -7],
-  );
+  const rotateX = useTransform(pointerY, [-0.5, 0.5], [7, -7]);
 
-  const rotateY = useTransform(
-    pointerX,
-    [-0.5, 0.5],
-    [-9, 9],
-  );
+  const rotateY = useTransform(pointerX, [-0.5, 0.5], [-9, 9]);
 
-  function handlePointerMove(
-    event: PointerEvent<HTMLDivElement>,
-  ) {
-    if (
-      prefersReducedMotion ||
-      event.pointerType !== 'mouse'
-    ) {
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (prefersReducedMotion || event.pointerType !== "mouse") {
       return;
     }
 
     const bounds = event.currentTarget.getBoundingClientRect();
 
-    rawX.set(
-      (event.clientX - bounds.left) / bounds.width - 0.5,
-    );
+    rawX.set((event.clientX - bounds.left) / bounds.width - 0.5);
 
-    rawY.set(
-      (event.clientY - bounds.top) / bounds.height - 0.5,
-    );
+    rawY.set((event.clientY - bounds.top) / bounds.height - 0.5);
   }
 
   function resetCard() {
@@ -185,19 +214,37 @@ export function ProductCollectionCard({
         }
       >
         <Stage>
-          <AccentCircle $color={card.accentColor} />
+          {card.background.type === "color" && (
+            <AccentCircle $color={card.background.color} />
+          )}
 
-          <BackgroundText aria-hidden="true">
-            Collection
-          </BackgroundText>
+          {card.background.type === "image" && (
+            <>
+              <BackgroundMedia $position={card.background.position ?? "center"}>
+                <Image
+                  src={card.background.imageUrl}
+                  alt=""
+                  fill
+                  sizes="(max-width: 480px) 100vw, 360px"
+                  loading={priority ? "eager" : "lazy"}
+                />
+              </BackgroundMedia>
 
-          {card.products.map((layer, index) => (
+              <BackgroundOverlay
+                $color={card.background.overlayColor ?? "rgb(0 0 0 / 35%)"}
+              />
+            </>
+          )}
+
+          <BackgroundText aria-hidden="true">Collection</BackgroundText>
+
+          {card.products.map((layer) => (
             <ProductLayer
               key={`${layer.product.id}-${layer.depth}`}
               layer={layer}
               pointerX={pointerX}
               pointerY={pointerY}
-              priority={index === 0}
+              priority={priority && layer.depth === 5}
             />
           ))}
         </Stage>
@@ -210,9 +257,10 @@ export function ProductCollectionCard({
 
             <ViewButton
               href={`/collections/${card.slug}`}
-              $color={card.accentColor}
+              $backgroundColor={card.cta.backgroundColor}
+              $textColor={card.cta.textColor ?? "#111111"}
             >
-              Explore
+              {card.cta.label}
             </ViewButton>
           </Footer>
         </Details>

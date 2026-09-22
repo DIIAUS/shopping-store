@@ -56,48 +56,42 @@ export function ProductLayer({
   pointerY,
   priority = false,
 }: ProductLayerProps) {
-  const movement = layer.depth * 18;
+  const depthRatio = layer.depth / 5;
+  const movement = 10 + depthRatio * 34;
 
-  const x = useTransform(
-    pointerX,
-    (value) => value * movement,
-  );
+  const x = useTransform(pointerX, (value) => value * movement);
 
-  const y = useTransform(
-    pointerY,
-    (value) => value * movement,
-  );
+  const y = useTransform(pointerY, (value) => value * movement);
 
   const rotate = useTransform(
     pointerX,
-    (value) =>
-      layer.rotation + value * layer.depth * 4,
+    (value) => layer.rotation + value * (2 + depthRatio * 6),
   );
 
   return (
-  <LayerAnchor
-    $xPercent={layer.xPercent}
-    $yPercent={layer.yPercent}
-    style={{
-      zIndex: layer.depth,
-    }}
-  >
-    <LayerImage
+    <LayerAnchor
+      $xPercent={layer.xPercent}
+      $yPercent={layer.yPercent}
       style={{
-        x,
-        y,
-        rotate,
-        scale: layer.scale,
+        zIndex: layer.depth + 2,
       }}
     >
-      <Image
-        src={layer.product.imageUrl}
-        alt={layer.product.name}
-        fill
-        sizes="(max-width: 480px) 76vw, 295px"
-        priority={priority}
-      />
-    </LayerImage>
-  </LayerAnchor>
+      <LayerImage
+        style={{
+          x,
+          y,
+          rotate,
+          scale: layer.scale,
+        }}
+      >
+        <Image
+          src={layer.product.imageUrl}
+          alt={layer.product.name}
+          fill
+          sizes="(max-width: 480px) 76vw, 295px"
+          loading={priority ? "eager" : "lazy"}
+        />
+      </LayerImage>
+    </LayerAnchor>
   );
 }

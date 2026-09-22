@@ -1,21 +1,46 @@
 :root {
-  color-scheme: light;
-  --background: #f2f0eb;
-  --foreground: #171717;
-  --font-sans: var(--font-geist-sans), Arial, sans-serif;
+  --color-emerald-950: #082f28;
+  --color-emerald-900: #103d34;
+  --color-emerald-800: #195347;
+
+  --color-camel-700: #95613f;
+  --color-camel-500: #bd855d;
+
+  --color-gold-500: #bd9660;
+  --color-gold-300: #d5b985;
+
+  --color-sand-100: #eee0cc;
+  --color-ivory: #f7f0e5;
+  --color-ink: #181714;
+  --color-white: #ffffff;
+
+  --font-editorial: Georgia, serif;
+  --font-interface: Arial, sans-serif;
+
+  --page-max-width: 1440px;
+  --page-padding: clamp(18px, 4vw, 64px);
+
+  --header-height: 76px;
+  --announcement-height: 34px;
+
+  --radius-card: 28px;
+  --radius-button: 10px;
+
+  --transition-fast: 180ms ease;
+  --transition-normal: 300ms ease;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-ivory);
+}
 
 body {
   margin: 0;
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-}
-
-main {
-  width: min(100% - 32px, 1200px);
-  margin-inline: auto;
-  padding-block: 48px;
+  color: var(--color-ink);
+  background: var(--color-ivory);
+  font-family: var(--font-interface);
 }

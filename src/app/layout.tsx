@@ -2,6 +2,27 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { StyledComponentsRegistry } from "./StyledComponentsRegistry";
 import "./globals.css";
+import {
+  Cormorant_Garamond,
+  Manrope,
+  Noto_Naskh_Arabic,
+} from 'next/font/google';
+
+const editorialFont = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-editorial',
+  weight: ['400', '500', '600'],
+});
+
+const interfaceFont = Manrope({
+  subsets: ['latin'],
+  variable: '--font-interface',
+});
+
+const arabicFont = Noto_Naskh_Arabic({
+  subsets: ['arabic'],
+  variable: '--font-arabic',
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +41,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html
+  lang="en"
+  className={`
+    ${editorialFont.variable}
+    ${interfaceFont.variable}
+    ${arabicFont.variable}
+  `}
+>
       <body><StyledComponentsRegistry>{children}</StyledComponentsRegistry></body>
     </html>
   );
